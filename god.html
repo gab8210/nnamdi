@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuhu Bamalli Polytechnic Hostel Allocation</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Poppins', sans-serif; }
+    
+    .animated-bg {
+      background: linear-gradient(135deg, #0d4f21 0%, #1a7a34 25%, #0d4f21 50%, #145a28 75%, #0d4f21 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+    }
+    
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .logo-container {
+      animation: pulse 3s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.15; }
+      50% { transform: scale(1.05); opacity: 0.25; }
+    }
+    
+    .card-glass {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #0d4f21 0%, #1a7a34 100%);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(13, 79, 33, 0.3);
+    }
+    
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-approved { background: #d1fae5; color: #065f46; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+    
+    .toast {
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .floating-shapes {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    
+    .shape {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 50%;
+      animation: float 20s infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full overflow-auto animated-bg">
+  <div class="floating-shapes">
+   <div class="shape" style="width: 100px; height: 100px; top: 10%; left: 10%; animation-delay: 0s;"></div>
+   <div class="shape" style="width: 150px; height: 150px; top: 60%; left: 80%; animation-delay: 5s;"></div>
+   <div class="shape" style="width: 80px; height: 80px; top: 80%; left: 20%; animation-delay: 10s;"></div>
+   <div class="shape" style="width: 120px; height: 120px; top: 20%; left: 70%; animation-delay: 15s;"></div>
+  </div>
+  <div class="logo-container fixed inset-0 pointer-events-none z-0" style="background-image: url('https://nubapoly.edu.ng/index_files/logo_new-2.png'); background-repeat: no-repeat; background-position: center; background-size: contain; background-attachment: fixed; opacity: 0.1;"></div>
+  <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+  
+  <div id="app" class="relative z-10 min-h-full p-4 md:p-8">
+   <div id="landing-page" class="flex items-center justify-center min-h-full">
+    <div class="card-glass rounded-3xl p-8 md:p-12 max-w-lg w-full text-center">
+     <div class="mb-6"><img src="https://nubapoly.edu.ng/index_files/logo_new-2.png" alt="NUBAPOLY Logo" class="w-24 h-24 mx-auto mb-4 object-contain" loading="lazy" onerror="this.src='https://placehold.co/100x100?text=NUBA+POLY';">
+      <h1 id="main-title" class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Nuhu Bamalli Polytechnic Hostel Allocation</h1>
+      <p id="welcome-text" class="text-gray-600">Welcome to the Online Hostel Management System</p>
+     </div>
+     <div class="space-y-4">
+      <button onclick="showPage('student-login')" class="btn-primary w-full py-4 px-6 rounded-xl text-white font-semibold text-lg"> 🎓 Student Portal </button>
+      <button onclick="showPage('admin-login')" class="btn-primary w-full py-4 px-6 rounded-xl text-white font-semibold text-lg"> 🔐 Admin Portal </button>
+     </div>
+     <p class="mt-8 text-sm text-gray-500">© 2026 Nuhu Bamalli Polytechnic</p>
+    </div>
+   </div>
+
+   <div id="student-login" class="hidden flex items-center justify-center min-h-full">
+    <div class="card-glass rounded-3xl p-8 max-w-md w-full">
+     <button onclick="showPage('landing-page')" class="text-green-700 mb-4 flex items-center gap-2 hover:underline"> ← Back to Home </button>
+     <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">🎓 Student Login</h2>
+     <div class="space-y-4">
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Student ID / Matric Number</label> 
+       <input type="text" id="student-login-id" placeholder="Enter your Student ID" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none">
+      </div>
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Password</label> 
+       <input type="password" id="student-login-password" placeholder="Enter your password" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none">
+      </div>
+      <button onclick="studentLogin()" class="btn-primary w-full py-4 rounded-xl text-white font-semibold"> Login </button>
+      <p class="text-center text-gray-600">Don't have an account? <button onclick="showPage('student-register')" class="text-green-700 font-semibold hover:underline">Register &amp; Apply</button></p>
+     </div>
+    </div>
+   </div>
+
+   <div id="student-register" class="hidden flex items-center justify-center min-h-full py-8">
+    <div class="card-glass rounded-3xl p-8 max-w-2xl w-full">
+     <button onclick="showPage('student-login')" class="text-green-700 mb-4 flex items-center gap-2 hover:underline"> ← Back to Login </button>
+     <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📝 Hostel Application Form</h2>
+     <div class="grid md:grid-cols-2 gap-4">
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label> 
+       <input type="text" id="reg-fullname" placeholder="Enter your full name" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none">
+      </div>
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Student ID / Matric Number *</label> 
+       <input type="text" id="reg-studentid" placeholder="e.g., N/COM/20/00061" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none">
+      </div>
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Department *</label> 
+       <select id="reg-department" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"> 
+         <option value="">Select Department</option> 
+         <option value="Computer Science">Computer Science</option> 
+         <option value="Accountancy">Accountancy</option> 
+         <option value="Business Administration">Business Administration</option> 
+         <option value="Electrical Engineering">Electrical Engineering</option> 
+         <option value="Mechanical Engineering">Mechanical Engineering</option> 
+         <option value="Civil Engineering">Civil Engineering</option> 
+         <option value="Mass Communication">Mass Communication</option> 
+         <option value="Public Administration">Public Administration</option> 
+         <option value="Statistics">Statistics</option> 
+         <option value="Banking and Finance">Banking and Finance</option> 
+       </select>
+      </div>
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Level *</label> 
+       <select id="reg-level" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"> 
+         <option value="">Select Level</option> 
+         <option value="ND 1">ND 1</option> 
+         <option value="ND 2">ND 2</option> 
+         <option value="HND 1">HND 1</option> 
+         <option value="HND 2">HND 2</option> 
+       </select>
+      </div>
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Gender *</label> 
+       <select id="reg-gender" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"> 
+         <option value="">Select Gender</option> 
+         <option value="Male">Male</option> 
+         <option value="Female">Female</option> 
+       </select>
+      </div>
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label> 
+       <input type="tel" id="reg-phone" placeholder="e.g., 08012345678" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none">
+      </div>
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label> 
+       <input type="email" id="reg-email" placeholder="your.email@example.com" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none">
+      </div>
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Create Password *</label> 
+       <input type="password" id="reg-password" placeholder="Create a password" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none">
+      </div>
+     </div>
+     <button onclick="submitApplication()" id="submit-btn" class="btn-primary w-full py-4 rounded-xl text-white font-semibold mt-6"> Submit Application </button>
+    </div>
+   </div>
+
+   <div id="student-dashboard" class="hidden min-h-full py-8">
+    <div class="max-w-4xl mx-auto">
+     <div class="card-glass rounded-3xl p-6 md:p-8">
+      <div class="flex justify-between items-center mb-6">
+       <h2 class="text-2xl font-bold text-gray-800">🏠 My Hostel Status</h2>
+       <button onclick="studentLogout()" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"> Logout </button>
+      </div>
+      <div id="student-info" class="bg-gray-50 rounded-xl p-6 mb-6"></div>
+      <div id="allocation-status" class="rounded-xl p-6 text-center"></div>
+     </div>
+    </div>
+   </div>
+
+   <div id="admin-login" class="hidden flex items-center justify-center min-h-full">
+    <div class="card-glass rounded-3xl p-8 max-w-md w-full">
+     <button onclick="showPage('landing-page')" class="text-green-700 mb-4 flex items-center gap-2 hover:underline"> ← Back to Home </button>
+     <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">🔐 Admin Login</h2>
+     <div class="space-y-4">
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Username</label> 
+       <input type="text" id="admin-username" placeholder="Enter username" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none">
+      </div>
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Password</label> 
+       <input type="password" id="admin-password" placeholder="Enter password" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none">
+      </div>
+      <button onclick="adminLogin()" class="btn-primary w-full py-4 rounded-xl text-white font-semibold"> Login as Admin </button>
+     </div>
+    </div>
+   </div>
+
+   <div id="admin-dashboard" class="hidden min-h-full py-8">
+    <div class="max-w-6xl mx-auto">
+     <div class="card-glass rounded-3xl p-6 md:p-8">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+       <h2 class="text-2xl font-bold text-gray-800">📊 Admin Dashboard</h2>
+       <button onclick="adminLogout()" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"> Logout </button>
+      </div>
+      
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+       <div class="bg-blue-50 rounded-xl p-4 text-center">
+        <p class="text-3xl font-bold text-blue-600" id="stat-total">0</p>
+        <p class="text-sm text-blue-700">Total</p>
+       </div>
+       <div class="bg-yellow-50 rounded-xl p-4 text-center">
+        <p class="text-3xl font-bold text-yellow-600" id="stat-pending">0</p>
+        <p class="text-sm text-yellow-700">Pending</p>
+       </div>
+       <div class="bg-green-50 rounded-xl p-4 text-center">
+        <p class="text-3xl font-bold text-green-600" id="stat-approved">0</p>
+        <p class="text-sm text-green-700">Approved</p>
+       </div>
+       <div class="bg-purple-50 rounded-xl p-4 text-center">
+        <p class="text-3xl font-bold text-purple-600" id="stat-paid">0</p>
+        <p class="text-sm text-purple-700">Paid</p>
+       </div>
+       <div class="bg-red-50 rounded-xl p-4 text-center">
+        <p class="text-3xl font-bold text-red-600" id="stat-rejected">0</p>
+        <p class="text-sm text-red-700">Rejected</p>
+       </div>
+      </div>
+
+      <div class="mb-6 p-4 bg-gray-50 rounded-xl">
+       <p class="text-sm font-semibold text-gray-700 mb-3">Filter by Department:</p>
+       <div class="flex gap-2 flex-wrap" id="dept-filter-container">
+         <button onclick="filterByDepartment('all')" class="dept-filter-btn px-4 py-2 rounded-lg bg-gray-800 text-white" data-dept="all"> All </button>
+         <button onclick="filterByDepartment('Computer Science')" class="dept-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700" data-dept="Computer Science"> Computer Science </button>
+         <button onclick="filterByDepartment('Accountancy')" class="dept-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700" data-dept="Accountancy"> Accountancy </button>
+         <button onclick="filterByDepartment('Business Administration')" class="dept-filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700" data-dept="Business Administration"> Business Admin </button>
+       </div>
+      </div>
+
+      <div class="flex gap-2 mb-4 flex-wrap" id="status-filter-container">
+       <button onclick="filterApplications('all')" class="filter-btn px-4 py-2 rounded-lg bg-gray-800 text-white" data-filter="all"> All Status </button> 
+       <button onclick="filterApplications('pending')" class="filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700" data-filter="pending"> Pending </button> 
+       <button onclick="filterApplications('approved')" class="filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700" data-filter="approved"> Approved </button> 
+       <button onclick="filterApplications('rejected')" class="filter-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700" data-filter="rejected"> Rejected </button>
+      </div>
+
+      <div class="overflow-x-auto">
+       <table class="w-full">
+        <thead class="bg-gray-100">
+         <tr>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Student ID</th>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Department</th>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Gender</th>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+         </tr>
+        </thead>
+        <tbody id="applications-table"></tbody>
+       </table>
+      </div>
+      <div id="no-applications" class="hidden text-center py-8 text-gray-500">
+       <p class="text-xl">📭 No applications found</p>
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <div id="allocation-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+     <h3 class="text-xl font-bold text-gray-800 mb-4">🏠 Allocate Hostel</h3>
+     <p id="modal-student-name" class="text-gray-600 mb-4"></p>
+     <div class="space-y-4">
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Hostel Name</label> 
+       <select id="modal-hostel" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"> 
+         <option value="">Select Hostel</option> 
+         <option value="Block A - Male">Block A - Male</option> 
+         <option value="Block B - Male">Block B - Male</option> 
+         <option value="Block C - Female">Block C - Female</option> 
+         <option value="Block D - Female">Block D - Female</option> 
+       </select>
+      </div>
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Room Number</label> 
+       <input type="text" id="modal-room" placeholder="e.g., 101" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none">
+      </div>
+      <div>
+       <label class="block text-sm font-medium text-gray-700 mb-1">Bed Space</label> 
+       <input type="text" id="modal-bed" placeholder="e.g., A, B, C, D" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none">
+      </div>
+     </div>
+     <div class="flex gap-3 mt-6">
+      <button onclick="closeModal()" class="flex-1 py-3 px-4 border-2 border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-100"> Cancel </button> 
+      <button onclick="confirmAllocation()" class="flex-1 py-3 px-4 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700"> Approve &amp; Allocate </button>
+     </div>
+    </div>
+   </div>
+
+   <div id="delete-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+     <h3 class="text-xl font-bold text-gray-800 mb-4">⚠️ Confirm Rejection</h3>
+     <p class="text-gray-600 mb-4">Are you sure you want to reject this application?</p>
+     <div class="flex gap-3">
+      <button onclick="closeDeleteModal()" class="flex-1 py-3 px-4 border-2 border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-100"> Cancel </button> 
+      <button onclick="confirmReject()" class="flex-1 py-3 px-4 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700"> Reject </button>
+     </div>
+    </div>
+   </div>
+
+   <div id="student-details-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+     <div class="flex justify-between items-start mb-6">
+      <h3 class="text-2xl font-bold text-gray-800">📋 Application Details</h3>
+      <button onclick="closeStudentDetailsModal()" class="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
+     </div>
+     <div class="space-y-4" id="details-modal-content"></div>
+    </div>
+   </div>
+
+  </div>
+
+  <script>
+    // Local State Storage Strategy (Fallbacks if remote SDK scripts are absent)
+    let allRecords = JSON.parse(localStorage.getItem('hostel_records')) || [];
+    let currentFilter = 'all';
+    let currentDepartmentFilter = 'all';
+    let currentStudentId = null;
+    let selectedApplication = null;
+
+    const ADMIN_USERNAME = 'admin';
+    const ADMIN_PASSWORD = 'h6';
+
+    // Core Layout Control
+    function showPage(pageId) {
+      document.querySelectorAll('#app > div').forEach(page => page.classList.add('hidden'));
+      const activePage = document.getElementById(pageId);
+      if(activePage) {
+        activePage.classList.remove('hidden');
+        if(pageId === 'student-login' || pageId === 'student-register' || pageId === 'admin-login') {
+            activePage.classList.add('flex');
+        }
+      }
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+      toast.className = `toast ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg font-medium`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Save state helper
+    function saveAndSync() {
+      localStorage.setItem('hostel_records', JSON.stringify(allRecords));
+      updateStatistics();
+      renderApplications();
+      if (currentStudentId) updateStudentDashboard();
+    }
+
+    // Form Submission & Registration
+    function submitApplication() {
+      const name = document.getElementById('reg-fullname').value.trim();
+      const studentId = document.getElementById('reg-studentid').value.trim();
+      const dept = document.getElementById('reg-department').value;
+      const level = document.getElementById('reg-level').value;
+      const gender = document.getElementById('reg-gender').value;
+      const phone = document.getElementById('reg-phone').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+
+      if (!name || !studentId || !dept || !level || !gender || !phone || !email || !password) {
+        showToast('Please fill all required fields.', 'error');
+        return;
+      }
+
+      if (allRecords.some(r => r.student_id.toLowerCase() === studentId.toLowerCase())) {
+        showToast('An application already exists with this Student ID.', 'error');
+        return;
+      }
+
+      const newRecord = {
+        full_name: name,
+        student_id: studentId,
+        department: dept,
+        level: level,
+        gender: gender,
+        phone: phone,
+        email: email,
+        password: password,
+        status: 'pending',
+        applied_date: new Date().toLocaleDateString(),
+        hostel: '',
+        room: '',
+        bed: ''
+      };
+
+      allRecords.push(newRecord);
+      saveAndSync();
+      showToast('Application submitted successfully!');
+      
+      // Clear values
+      document.querySelectorAll('#student-register input, #student-register select').forEach(el => el.value = '');
+      showPage('student-login');
+    }
+
+    // Student Session Controllers
+    function studentLogin() {
+      const studentId = document.getElementById('student-login-id').value.trim();
+      const password = document.getElementById('student-login-password').value;
+
+      const student = allRecords.find(r => r.student_id.toLowerCase() === studentId.toLowerCase() && r.password === password);
+      
+      if (student) {
+        currentStudentId = student.student_id;
+        updateStudentDashboard();
+        showPage('student-dashboard');
+        showToast('Welcome to your student dashboard.');
+      } else {
+        showToast('Invalid Student ID or Password.', 'error');
+      }
+    }
+
+    function studentLogout() {
+      currentStudentId = null;
+      document.getElementById('student-login-id').value = '';
+      document.getElementById('student-login-password').value = '';
+      showPage('landing-page');
+    }
+
+    function updateStudentDashboard() {
+      if (!currentStudentId) return;
+      const student = allRecords.find(r => r.student_id === currentStudentId);
+      if (!student) return;
+
+      document.getElementById('student-info').innerHTML = `
+        <div class="grid md:grid-cols-2 gap-4">
+          <div><span class="font-semibold text-gray-700">Name:</span> ${student.full_name}</div>
+          <div><span class="font-semibold text-gray-700">Student ID:</span> ${student.student_id}</div>
+          <div><span class="font-semibold text-gray-700">Department:</span> ${student.department}</div>
+          <div><span class="font-semibold text-gray-700">Level:</span> ${student.level}</div>
+          <div><span class="font-semibold text-gray-700">Gender:</span> ${student.gender}</div>
+          <div><span class="font-semibold text-gray-700">Date Applied:</span> ${student.applied_date}</div>
+        </div>
+      `;
+
+      const statusDiv = document.getElementById('allocation-status');
+      if (student.status === 'approved') {
+        statusDiv.className = 'rounded-xl p-6 text-center bg-green-50 border-2 border-green-200';
+        statusDiv.innerHTML = `
+          <h3 class="text-2xl font-bold text-green-700 mb-2">Approved</h3>
+          <p class="text-green-600 mb-4">Your hostel accommodation configuration is ready:</p>
+          <div class="bg-white rounded-lg p-4 inline-block text-left border">
+            <p><strong>Hostel:</strong> ${student.hostel}</p>
+            <p><strong>Room:</strong> ${student.room}</p>
+            <p><strong>Bed Space:</strong> ${student.bed}</p>
+          </div>
+        `;
+      } else if (student.status === 'rejected') {
+        statusDiv.className = 'rounded-xl p-6 text-center bg-red-50 border-2 border-red-200';
+        statusDiv.innerHTML = `<h3 class="text-2xl font-bold text-red-700">Application Declined</h3><p class="text-red-600 mt-2">Please visit the student affairs office.</p>`;
+      } else {
+        statusDiv.className = 'rounded-xl p-6 text-center bg-yellow-50 border-2 border-yellow-200';
+        statusDiv.innerHTML = `<h3 class="text-2xl font-bold text-yellow-700">Awaiting Review</h3><p class="text-yellow-600 mt-2">Your application is currently pending admin assessment.</p>`;
+      }
+    }
+
+    // Admin Panel Management Actions
+    function adminLogin() {
+      const u = document.getElementById('admin-username').value.trim();
+      const p = document.getElementById('admin-password').value;
+
+      if (u === ADMIN_USERNAME && p === ADMIN_PASSWORD) {
+        saveAndSync();
+        showPage('admin-dashboard');
+        showToast('Admin authorization verified.');
+      } else {
+        showToast('Invalid admin system profile setup configuration.', 'error');
+      }
+    }
+
+    function adminLogout() {
+      document.getElementById('admin-username').value = '';
+      document.getElementById('admin-password').value = '';
+      showPage('landing-page');
+    }
+
+    function updateStatistics() {
+      document.getElementById('stat-total').textContent = allRecords.length;
+      document.getElementById('stat-pending').textContent = allRecords.filter(r => r.status === 'pending').length;
+      document.getElementById('stat-approved').textContent = allRecords.filter(r => r.status === 'approved').length;
+      document.getElementById('stat-rejected').textContent = allRecords.filter(r => r.status === 'rejected').length;
+    }
+
+    function filterByDepartment(dept) {
+      currentDepartmentFilter = dept;
+      document.querySelectorAll('#dept-filter-container button').forEach(b => {
+        if(b.getAttribute('data-dept') === dept) { b.className = "px-4 py-2 rounded-lg bg-gray-800 text-white"; }
+        else { b.className = "px-4 py-2 rounded-lg bg-gray-200 text-gray-700"; }
+      });
+      renderApplications();
+    }
+
+    function filterApplications(status) {
+      currentFilter = status;
+      document.querySelectorAll('#status-filter-container button').forEach(b => {
+        if(b.getAttribute('data-filter') === status) { b.className = "px-4 py-2 rounded-lg bg-gray-800 text-white"; }
+        else { b.className = "px-4 py-2 rounded-lg bg-gray-200 text-gray-700"; }
+      });
+      renderApplications();
+    }
+
+    function renderApplications() {
+      const tableBody = document.getElementById('applications-table');
+      tableBody.innerHTML = '';
+
+      let filtered = allRecords.filter(r => {
+        const matchesStatus = currentFilter === 'all' || r.status === currentFilter;
+        const matchesDept = currentDepartmentFilter === 'all' || r.department === currentDepartmentFilter;
+        return matchesStatus && matchesDept;
+      });
+
+      if(filtered.length === 0) {
+        document.getElementById('no-applications').classList.remove('hidden');
+        return;
+      }
+      document.getElementById('no-applications').classList.add('hidden');
+
+      filtered.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.className = "border-b hover:bg-gray-50";
+        tr.innerHTML = `
+          <td class="px-4 py-3 font-mono text-sm">${r.student_id}</td>
+          <td class="px-4 py-3 text-sm">${r.full_name}</td>
+          <td class="px-4 py-3 text-sm">${r.department}</td>
+          <td class="px-4 py-3 text-sm">${r.gender}</td>
+          <td class="px-4 py-3 text-sm"><span class="px-2 py-1 text-xs font-semibold rounded-full status-${r.status}">${r.status}</span></td>
+          <td class="px-4 py-3 text-sm space-x-1">
+            <button onclick="openDetails('${r.student_id}')" class="text-blue-600 hover:underline">View</button>
+            ${r.status === 'pending' ? `
+              <button onclick="openAllocateModal('${r.student_id}')" class="text-green-600 hover:underline font-semibold">Allocate</button>
+              <button onclick="openRejectModal('${r.student_id}')" class="text-red-600 hover:underline">Reject</button>
+            `: ''}
+            <button onclick="deleteRecord('${r.student_id}')" class="text-gray-400 hover:text-red-600 ml-2">🗑️</button>
+          </td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    // Modal Handlers
+    function openAllocateModal(id) {
+      selectedApplication = allRecords.find(r => r.student_id === id);
+      document.getElementById('modal-student-name').textContent = `Student: ${selectedApplication.full_name} (${selectedApplication.gender})`;
+      document.getElementById('allocation-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('allocation-modal').classList.add('hidden');
+    }
+
+    function confirmAllocation() {
+      const hostel = document.getElementById('
